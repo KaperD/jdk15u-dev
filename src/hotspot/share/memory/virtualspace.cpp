@@ -186,13 +186,13 @@ void ReservedSpace::initialize(size_t size, size_t alignment, bool large,
     // important.  If available space is not detected, return NULL.
 
     if (requested_address != 0) {
-      base = os::attempt_reserve_memory_at(size, requested_address, _fd_for_heap);
+      base = os::attempt_reserve_memory_at(size, requested_address, _fd_for_heap, executable);
       if (failed_to_reserve_as_requested(base, requested_address, size, false, _fd_for_heap != -1)) {
         // OS ignored requested address. Try different address.
         base = NULL;
       }
     } else {
-      base = os::reserve_memory(size, NULL, alignment, _fd_for_heap);
+      base = os::reserve_memory(size, NULL, alignment, _fd_for_heap, executable);
     }
 
     if (base == NULL) return;
@@ -378,9 +378,9 @@ void ReservedHeapSpace::try_reserve_heap(size_t size,
     // important.  If available space is not detected, return NULL.
 
     if (requested_address != 0) {
-      base = os::attempt_reserve_memory_at(size, requested_address, _fd_for_heap);
+      base = os::attempt_reserve_memory_at(size, requested_address, _fd_for_heap, executable());
     } else {
-      base = os::reserve_memory(size, NULL, alignment, _fd_for_heap);
+      base = os::reserve_memory(size, NULL, alignment, _fd_for_heap, executable());
     }
   }
   if (base == NULL) { return; }
@@ -667,8 +667,10 @@ VirtualSpace::VirtualSpace() {
 
 bool VirtualSpace::initialize(ReservedSpace rs, size_t committed_size) {
   const size_t max_commit_granularity = os::page_size_for_region_unaligned(rs.size(), 1);
-  tty->print("%lu\n", max_commit_granularity);
-  return initialize_with_granularity(rs, committed_size, max_commit_granularity);
+  tty->print("HELLO %lu\n", max_commit_granularity);
+  bool x = initialize_with_granularity(rs, committed_size, max_commit_granularity);
+  tty->print("%d\n", x);
+  return x;
 }
 
 bool VirtualSpace::initialize_with_granularity(ReservedSpace rs, size_t committed_size, size_t max_commit_granularity) {
@@ -992,7 +994,7 @@ void VirtualSpace::shrink_by(size_t size) {
     assert(middle_high_boundary() <= aligned_upper_new_high &&
            aligned_upper_new_high + upper_needs <= upper_high_boundary(),
            "must not shrink beyond region");
-    if (!os::uncommit_memory(aligned_upper_new_high, upper_needs)) {
+    if (!os::uncommit_memory(aligned_upper_new_high, upper_needs, _executable)) {
       debug_only(warning("os::uncommit_memory failed"));
       return;
     } else {
@@ -1003,7 +1005,7 @@ void VirtualSpace::shrink_by(size_t size) {
     assert(lower_high_boundary() <= aligned_middle_new_high &&
            aligned_middle_new_high + middle_needs <= middle_high_boundary(),
            "must not shrink beyond region");
-    if (!os::uncommit_memory(aligned_middle_new_high, middle_needs)) {
+    if (!os::uncommit_memory(aligned_middle_new_high, middle_needs, _executable)) {
       debug_only(warning("os::uncommit_memory failed"));
       return;
     } else {
@@ -1014,7 +1016,7 @@ void VirtualSpace::shrink_by(size_t size) {
     assert(low_boundary() <= aligned_lower_new_high &&
            aligned_lower_new_high + lower_needs <= lower_high_boundary(),
            "must not shrink beyond region");
-    if (!os::uncommit_memory(aligned_lower_new_high, lower_needs)) {
+    if (!os::uncommit_memory(aligned_lower_new_high, lower_needs, _executable)) {
       debug_only(warning("os::uncommit_memory failed"));
       return;
     } else {

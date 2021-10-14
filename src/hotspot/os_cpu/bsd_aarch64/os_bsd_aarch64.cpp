@@ -216,7 +216,15 @@ JVM_handle_bsd_signal(int sig,
                       void* ucVoid,
                       int abort_if_unrecognized) {
   // need change
-  return 1;
+//  tty->print("%d\n", sig);
+  address pc          = NULL;
+  ucontext_t* uc = (ucontext_t*) ucVoid;
+  pc = (address) os::Bsd::ucontext_get_pc(uc);
+  Thread* t = Thread::current_or_null_safe();
+  VMError::report_and_die(t, sig, pc, info, ucVoid);
+
+  ShouldNotReachHere();
+  return false;
 }
 
 //bool PosixSignals::pd_hotspot_signal_handler(int sig, siginfo_t* info,

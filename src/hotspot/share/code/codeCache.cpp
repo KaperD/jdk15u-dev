@@ -405,6 +405,7 @@ void CodeCache::add_heap(CodeHeap* heap) {
 }
 
 void CodeCache::add_heap(ReservedSpace rs, const char* name, int code_blob_type) {
+  tty->print("TTT\n");
   // Check if heap is needed
   if (!heap_available(code_blob_type)) {
     return;
@@ -421,7 +422,6 @@ void CodeCache::add_heap(ReservedSpace rs, const char* name, int code_blob_type)
     vm_exit_during_initialization(err_msg("Could not reserve enough space in %s (" SIZE_FORMAT "K)",
                                           heap->name(), size_initial/K));
   }
-
   // Register the CodeHeap
   MemoryService::add_code_heap_memory_pool(heap, name);
 }

@@ -248,6 +248,7 @@ bool CodeHeap::reserve(ReservedSpace rs, size_t committed_size, size_t segment_s
   // initialize remaining instance variables, heap memory and segmap
   clear();
   init_segmap_template();
+  tty->print("NET\n");
   return true;
 }
 

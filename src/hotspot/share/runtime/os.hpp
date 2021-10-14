@@ -116,9 +116,9 @@ class os: AllStatic {
   }
 
   static char*  pd_reserve_memory(size_t bytes, char* addr = 0,
-                                  size_t alignment_hint = 0);
-  static char*  pd_attempt_reserve_memory_at(size_t bytes, char* addr);
-  static char*  pd_attempt_reserve_memory_at(size_t bytes, char* addr, int file_desc);
+                                  size_t alignment_hint = 0, bool executable = false);
+  static char*  pd_attempt_reserve_memory_at(size_t bytes, char* addr, bool executable);
+  static char*  pd_attempt_reserve_memory_at(size_t bytes, char* addr, int file_desc, bool executable);
   static bool   pd_commit_memory(char* addr, size_t bytes, bool executable);
   static bool   pd_commit_memory(char* addr, size_t size, size_t alignment_hint,
                                  bool executable);
@@ -129,7 +129,7 @@ class os: AllStatic {
   static void   pd_commit_memory_or_exit(char* addr, size_t size,
                                          size_t alignment_hint,
                                          bool executable, const char* mesg);
-  static bool   pd_uncommit_memory(char* addr, size_t bytes);
+  static bool   pd_uncommit_memory(char* addr, size_t bytes, bool executable);
   static bool   pd_release_memory(char* addr, size_t bytes);
 
   static char*  pd_map_memory(int fd, const char* file_name, size_t file_offset,
@@ -313,11 +313,11 @@ class os: AllStatic {
 
   static int    vm_allocation_granularity();
   static char*  reserve_memory(size_t bytes, char* addr = 0,
-                               size_t alignment_hint = 0, int file_desc = -1);
+                               size_t alignment_hint = 0, int file_desc = -1, bool executable = false);
   static char*  reserve_memory(size_t bytes, char* addr,
-                               size_t alignment_hint, MEMFLAGS flags);
-  static char*  reserve_memory_aligned(size_t size, size_t alignment, int file_desc = -1);
-  static char*  attempt_reserve_memory_at(size_t bytes, char* addr, int file_desc = -1);
+                               size_t alignment_hint, MEMFLAGS flags, bool executable = false);
+  static char*  reserve_memory_aligned(size_t size, size_t alignment, int file_desc = -1, bool executable = false);
+  static char*  attempt_reserve_memory_at(size_t bytes, char* addr, int file_desc = -1, bool executable = false);
 
 
   // Split a reserved memory region [base, base+size) into two regions [base, base+split) and
@@ -340,7 +340,7 @@ class os: AllStatic {
   static void   commit_memory_or_exit(char* addr, size_t size,
                                       size_t alignment_hint,
                                       bool executable, const char* mesg);
-  static bool   uncommit_memory(char* addr, size_t bytes);
+  static bool   uncommit_memory(char* addr, size_t bytes, bool executable = false);
   static bool   release_memory(char* addr, size_t bytes);
 
   // Touch memory pages that cover the memory range from start to end (exclusive)

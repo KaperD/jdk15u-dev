@@ -304,7 +304,7 @@ char* os::replace_existing_mapping_with_file_mapping(char* base, size_t size, in
 // Multiple threads can race in this code, and can remap over each other with MAP_FIXED,
 // so on posix, unmap the section at the start and at the end of the chunk that we mapped
 // rather than unmapping and remapping the whole chunk to get requested alignment.
-char* os::reserve_memory_aligned(size_t size, size_t alignment, int file_desc) {
+char* os::reserve_memory_aligned(size_t size, size_t alignment, int file_desc, bool executable) {
   assert((alignment & (os::vm_allocation_granularity() - 1)) == 0,
       "Alignment must be a multiple of allocation granularity (page size)");
   assert((size & (alignment -1)) == 0, "size must be 'alignment' aligned");
@@ -324,7 +324,7 @@ char* os::reserve_memory_aligned(size_t size, size_t alignment, int file_desc) {
       MemTracker::record_virtual_memory_reserve((address)extra_base, extra_size, CALLER_PC);
     }
   } else {
-    extra_base = os::reserve_memory(extra_size, NULL, alignment);
+    extra_base = os::reserve_memory(extra_size, NULL, alignment, executable);
   }
 
   if (extra_base == NULL) {
