@@ -29,6 +29,7 @@
 AC_DEFUN([PLATFORM_EXTRACT_VARS_FROM_CPU],
 [
   # First argument is the cpu name from the trip/quad
+//AC_MSG_ERROR([$1])
   case "$1" in
     x86_64*x32)
       VAR_CPU=x32

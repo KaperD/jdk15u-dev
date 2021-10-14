@@ -296,7 +296,7 @@ SplashRedrawWindow(Splash * splash) {
                             hasAlpha: YES
                             isPlanar: NO
                       colorSpaceName: NSDeviceRGBColorSpace
-                        bitmapFormat: NSAlphaFirstBitmapFormat | NSAlphaNonpremultipliedBitmapFormat
+                        bitmapFormat: NSBitmapFormatAlphaFirst | NSBitmapFormatAlphaNonpremultiplied
                          bytesPerRow: splash->width * 4
                         bitsPerPixel: 32];
 
@@ -434,7 +434,7 @@ SplashScreenThread(void *param) {
 
         splash->window = (void*) [[NSWindow alloc]
             initWithContentRect: NSMakeRect(splash->x, splash->y, splash->width, splash->height)
-                      styleMask: NSBorderlessWindowMask
+                      styleMask: NSWindowStyleMaskBorderless
                         backing: NSBackingStoreBuffered
                           defer: NO
                          screen: SplashNSScreen()];

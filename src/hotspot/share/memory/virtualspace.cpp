@@ -667,6 +667,7 @@ VirtualSpace::VirtualSpace() {
 
 bool VirtualSpace::initialize(ReservedSpace rs, size_t committed_size) {
   const size_t max_commit_granularity = os::page_size_for_region_unaligned(rs.size(), 1);
+  tty->print("%lu\n", max_commit_granularity);
   return initialize_with_granularity(rs, committed_size, max_commit_granularity);
 }
 
@@ -814,6 +815,10 @@ static bool commit_expanded(char* start, size_t size, size_t alignment, bool pre
     return true;
   }
 
+  warning(
+    "INFO: os::commit_memory(" PTR_FORMAT ", " PTR_FORMAT
+  " size=" SIZE_FORMAT ", executable=%d) failed",
+    p2i(start), p2i(start + size), size, executable);
   debug_only(warning(
       "INFO: os::commit_memory(" PTR_FORMAT ", " PTR_FORMAT
       " size=" SIZE_FORMAT ", executable=%d) failed",
@@ -897,6 +902,7 @@ bool VirtualSpace::expand_by(size_t bytes, bool pre_touch) {
   if (lower_needs > 0) {
     assert(lower_high() + lower_needs <= lower_high_boundary(), "must not expand beyond region");
     if (!commit_expanded(lower_high(), lower_needs, _lower_alignment, pre_touch, _executable)) {
+      tty->print("Here1\n");
       return false;
     }
     _lower_high += lower_needs;
@@ -905,6 +911,7 @@ bool VirtualSpace::expand_by(size_t bytes, bool pre_touch) {
   if (middle_needs > 0) {
     assert(middle_high() + middle_needs <= middle_high_boundary(), "must not expand beyond region");
     if (!commit_expanded(middle_high(), middle_needs, _middle_alignment, pre_touch, _executable)) {
+      tty->print("Here2\n");
       return false;
     }
     _middle_high += middle_needs;
@@ -913,6 +920,7 @@ bool VirtualSpace::expand_by(size_t bytes, bool pre_touch) {
   if (upper_needs > 0) {
     assert(upper_high() + upper_needs <= upper_high_boundary(), "must not expand beyond region");
     if (!commit_expanded(upper_high(), upper_needs, _upper_alignment, pre_touch, _executable)) {
+      tty->print("Here3\n");
       return false;
     }
     _upper_high += upper_needs;

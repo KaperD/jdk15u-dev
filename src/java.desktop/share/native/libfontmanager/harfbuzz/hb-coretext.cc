@@ -27,6 +27,11 @@
  */
 
 #include "hb.hh"
+
+#ifdef HAVE_CORETEXT
+
+
+
 #include "hb-shaper-impl.hh"
 
 #include "hb-coretext.h"
@@ -1204,3 +1209,5 @@ _hb_coretext_aat_shape (hb_shape_plan_t    *shape_plan,
 {
   return _hb_coretext_shape (shape_plan, font, buffer, features, num_features);
 }
+
+#endif

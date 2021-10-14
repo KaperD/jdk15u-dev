@@ -205,7 +205,6 @@ bool CodeHeap::reserve(ReservedSpace rs, size_t committed_size, size_t segment_s
   assert(rs.size() >= committed_size, "reserved < committed");
   assert(segment_size >= sizeof(FreeBlock), "segment size is too small");
   assert(is_power_of_2(segment_size), "segment_size must be a power of 2");
-
   _segment_size      = segment_size;
   _log2_segment_size = exact_log2(segment_size);
 
@@ -223,6 +222,7 @@ bool CodeHeap::reserve(ReservedSpace rs, size_t committed_size, size_t segment_s
   os::trace_page_sizes(_name, committed_size, rs.size(), page_size,
                        rs.base(), rs.size());
   if (!_memory.initialize(rs, c_size)) {
+    tty->print("Hello1\n");
     return false;
   }
 
