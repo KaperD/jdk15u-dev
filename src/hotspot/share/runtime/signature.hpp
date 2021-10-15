@@ -386,10 +386,14 @@ class NativeSignatureIterator: public SignatureIterator {
   void do_type(BasicType type) {
     switch (type) {
     case T_BYTE:
-    case T_SHORT:
-    case T_INT:
     case T_BOOLEAN:
+      pass_byte();   _jni_offset++; _offset++;
+      break;
     case T_CHAR:
+    case T_SHORT:
+      pass_short();  _jni_offset++; _offset++;
+      break;
+    case T_INT:
       pass_int();    _jni_offset++; _offset++;
       break;
     case T_FLOAT:
@@ -423,7 +427,9 @@ class NativeSignatureIterator: public SignatureIterator {
   virtual void pass_long()             = 0;
   virtual void pass_object()           = 0;  // objects, arrays, inlines
   virtual void pass_float()            = 0;
-#ifdef _LP64
+  virtual void pass_byte()             { pass_int(); };
+  virtual void pass_short()            { pass_int(); };
+#ifdef _LP64f
   virtual void pass_double()           = 0;
 #else
   virtual void pass_double()           { pass_long(); }  // may be same as long

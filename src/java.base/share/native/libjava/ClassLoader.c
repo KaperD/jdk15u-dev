@@ -221,6 +221,7 @@ Java_java_lang_ClassLoader_defineClass0(JNIEnv *env,
                                         jint flags,
                                         jobject classData)
 {
+
     jbyte *body;
     char *utfName;
     jclass result = 0;
@@ -259,7 +260,6 @@ Java_java_lang_ClassLoader_defineClass0(JNIEnv *env,
     } else {
         utfName = NULL;
     }
-
     result = JVM_LookupDefineClass(env, lookup, utfName, body, length, pd, initialize, flags, classData);
 
  free_body:

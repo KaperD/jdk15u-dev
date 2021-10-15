@@ -566,6 +566,11 @@ int os::extra_bang_size_in_bytes() {
 }
 
 void os::current_thread_enable_wx(WXMode mode) {
+//  if (mode == WXExec) {
+//    tty->print("Mode WXExec\n");
+//  } else {
+//    tty->print("Mode WXWrite\n");
+//  }
   pthread_jit_write_protect_np(mode == WXExec);
 }
 

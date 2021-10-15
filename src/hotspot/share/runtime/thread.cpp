@@ -3657,8 +3657,10 @@ static void call_initPhase2(TRAPS) {
   JavaCallArguments args;
   args.push_int(DisplayVMOutputToStderr);
   args.push_int(log_is_enabled(Debug, init)); // print stack trace if exception thrown
+  tty->print("I was here\n");
   JavaCalls::call_static(&result, klass, vmSymbols::initPhase2_name(),
                                          vmSymbols::boolean_boolean_int_signature(), &args, CHECK);
+
   if (result.get_jint() != JNI_OK) {
     vm_exit_during_initialization(); // no message or exception
   }
@@ -3685,7 +3687,6 @@ void Threads::initialize_java_lang_classes(JavaThread* main_thread, TRAPS) {
   if (EagerXrunInit && Arguments::init_libraries_at_startup()) {
     create_vm_init_libraries();
   }
-
   initialize_class(vmSymbols::java_lang_String(), CHECK);
 
   // Inject CompactStrings value after the static initializers for String ran.
@@ -3693,6 +3694,7 @@ void Threads::initialize_java_lang_classes(JavaThread* main_thread, TRAPS) {
 
   // Initialize java_lang.System (needed before creating the thread)
   initialize_class(vmSymbols::java_lang_System(), CHECK);
+  tty->print("T3\n");
   // The VM creates & returns objects of this class. Make sure it's initialized.
   initialize_class(vmSymbols::java_lang_Class(), CHECK);
   initialize_class(vmSymbols::java_lang_ThreadGroup(), CHECK);
@@ -3776,7 +3778,9 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
   // Initialize the os module
   os::init();
 
-  MACOS_AARCH64_ONLY(os::current_thread_enable_wx(WXWrite));
+  MACOS_AARCH64_ONLY(
+    os::current_thread_enable_wx(WXWrite);
+  );
 
   // Record VM creation timing statistics
   TraceVmCreationTime create_vm_timer;
@@ -3955,7 +3959,6 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
   // This update must happen before we initialize the java classes, but
   // after any initialization logic that might modify the flags.
   Arguments::update_vm_info_property(VM_Version::vm_info_string());
-
   Thread* THREAD = Thread::current();
 
   // Always call even when there are not JVMTI environments yet, since environments
@@ -4012,7 +4015,6 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
   // The service thread enqueues JVMTI deferred events and does various hashtable
   // and other cleanups.  Needs to start before the compilers start posting events.
   ServiceThread::initialize();
-
   // initialize compiler(s)
 #if defined(COMPILER1) || COMPILER2_OR_JVMCI
 #if INCLUDE_JVMCI
@@ -4036,7 +4038,6 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
     CompileBroker::compilation_init_phase2();
   }
 #endif
-
   // Pre-initialize some JSR292 core classes to avoid deadlock during class loading.
   // It is done after compilers are initialized, because otherwise compilations of
   // signature polymorphic MH intrinsics can be missed

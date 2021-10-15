@@ -1017,6 +1017,13 @@ static jclass jvm_lookup_define_class(JNIEnv *env, jclass lookup, const char *na
     host_class = InstanceKlass::cast(lookup_k)->nest_host(CHECK_NULL);
   }
 
+  tty->print("LookupDefineClass: %s - %s%s, %s, %s, %s\n",
+             name,
+             is_nestmate ? "with dynamic nest-host " : "non-nestmate",
+             is_nestmate ? host_class->external_name() : "",
+             is_hidden ? "hidden" : "not hidden",
+             is_strong ? "strong" : "weak",
+             vm_annotations ? "with vm annotations" : "without vm annotation");
   log_info(class, nestmates)("LookupDefineClass: %s - %s%s, %s, %s, %s",
                              name,
                              is_nestmate ? "with dynamic nest-host " : "non-nestmate",

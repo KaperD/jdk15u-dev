@@ -38,6 +38,8 @@
 #include "jni.h"
 #include "unittest.hpp"
 
+#include "runtime/thread.inline.hpp"
+
 // Default value for -new-thread option: true on AIX because we run into
 // problems when attempting to initialize the JVM on the primordial thread.
 #ifdef _AIX
@@ -90,7 +92,14 @@ static int init_jvm(int argc, char **argv, bool disable_error_handling) {
   JavaVM* jvm;
   JNIEnv* env;
 
-  return JNI_CreateJavaVM(&jvm, (void**)&env, &args);
+  int ret = JNI_CreateJavaVM(&jvm, (void**)&env, &args);
+  if (ret == JNI_OK) {
+    // CreateJavaVM leaves WXExec context, while gtests
+    // calls internal functions assuming running in WXWwrite.
+    // Switch to WXWrite once for all test cases.
+    MACOS_AARCH64_ONLY(Thread::current()->enable_wx(WXWrite));
+  }
+  return ret;
 }
 
 class JVMInitializerListener : public ::testing::EmptyTestEventListener {
