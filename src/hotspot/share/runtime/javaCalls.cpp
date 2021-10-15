@@ -112,11 +112,15 @@ JavaCallWrapper::JavaCallWrapper(const methodHandle& callee_method, Handle recei
   if (_anchor.last_Java_sp() == NULL) {
     _thread->record_base_of_stack_pointer();
   }
+
+  MACOS_AARCH64_ONLY(_thread->enable_wx(WXExec));
 }
 
 
 JavaCallWrapper::~JavaCallWrapper() {
   assert(_thread == JavaThread::current(), "must still be the same thread");
+
+  MACOS_AARCH64_ONLY(_thread->enable_wx(WXExec));
 
   // restore previous handle block & Java frame linkage
   JNIHandleBlock *_old_handles = _thread->active_handles();
