@@ -50,6 +50,7 @@
 #include "runtime/frame.inline.hpp"
 #include "runtime/interfaceSupport.inline.hpp"
 #include "runtime/jniHandles.inline.hpp"
+#include "runtime/threadWXSetters.inline.hpp"
 #include "runtime/timerTrace.hpp"
 #include "runtime/vframe_hp.hpp"
 
@@ -123,11 +124,12 @@ Handle JavaArgumentUnboxer::next_arg(BasicType expectedType) {
 }
 
 // Bring the JVMCI compiler thread into the VM state.
-#define JVMCI_VM_ENTRY_MARK                   \
-  ThreadInVMfromNative __tiv(thread);         \
-  ResetNoHandleMark rnhm;                     \
-  HandleMarkCleaner __hm(thread);             \
-  Thread* THREAD = thread;                    \
+#define JVMCI_VM_ENTRY_MARK                                  \
+  MACOS_AARCH64_ONLY(ThreadWXEnable __wx(WXWrite, thread));  \
+  ThreadInVMfromNative __tiv(thread);                        \
+  ResetNoHandleMark rnhm;                                    \
+  HandleMarkCleaner __hm(thread);                            \
+  Thread* THREAD = thread;                                   \
   debug_only(VMNativeEntryWrapper __vew;)
 
 // Native method block that transitions current thread to '_thread_in_vm'.
