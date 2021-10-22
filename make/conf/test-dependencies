@@ -1,0 +1,43 @@
+#
+# Copyright (c) 2020, 2021, Oracle and/or its affiliates. All rights reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.  Oracle designates this
+# particular file as subject to the "Classpath" exception as provided
+# by Oracle in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
+#
+
+# Versions and download locations for dependencies used by pre-submit testing.
+
+BOOT_JDK_VERSION=15
+JTREG_VERSION=5.1
+JTREG_BUILD=b01
+GTEST_VERSION=1.8.1
+
+LINUX_X64_BOOT_JDK_FILENAME=OpenJDK15U-jdk_x64_linux_hotspot_2021-01-22-02-31.tar.gz
+LINUX_X64_BOOT_JDK_URL=https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk15u-2021-01-22-02-31/OpenJDK15U-jdk_x64_linux_hotspot_2021-01-22-02-31.tar.gz
+LINUX_X64_BOOT_JDK_SHA256=eee6ea48d0dccfdc6c229e6635776aa8245d8d11b69bbf470f30d92b5e8ac8b8
+
+WINDOWS_X64_BOOT_JDK_FILENAME=OpenJDK15U-jdk_x64_windows_hotspot_2021-01-22-02-31.zip
+WINDOWS_X64_BOOT_JDK_URL=https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk15u-2021-01-22-02-31/OpenJDK15U-jdk_x64_windows_hotspot_2021-01-22-02-31.zip
+WINDOWS_X64_BOOT_JDK_SHA256=52e39f7f1a856a5bfeba09bc42c2baa1bc8a9737c60babd7888b47b955a64000
+
+MACOS_X64_BOOT_JDK_FILENAME=OpenJDK15U-jdk_x64_mac_hotspot_2021-01-22-02-31.tar.gz
+MACOS_X64_BOOT_JDK_URL=https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk15u-2021-01-22-02-31/OpenJDK15U-jdk_x64_mac_hotspot_2021-01-22-02-31.tar.gz
+MACOS_X64_BOOT_JDK_SHA256=9b89a09cd02a887b29edf10e6a62ed98d47c148dc84acc9d80f72faab2837c2c
