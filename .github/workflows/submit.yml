@@ -944,6 +944,7 @@ jobs:
           $env:JT_HOME = cygpath "$HOME/jtreg" ;
           $env:GTEST = cygpath "$env:GITHUB_WORKSPACE/gtest" ;
           sed -i -e 's/\r$//' configure ;
+          sed -i -e 's/\r$//' make/autoconf/configure ;
           & bash configure
           --with-conf-name=windows-x64
           --with-msvc-toolset-version=14.28
