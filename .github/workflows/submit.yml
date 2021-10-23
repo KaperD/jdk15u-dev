@@ -170,7 +170,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install gcc-9=9.3.0-17ubuntu1~20.04 g++-9=9.3.0-17ubuntu1~20.04 libxrandr-dev libxtst-dev libcups2-dev libasound2-dev libx11-dev libxext-dev libxrender-dev libxt-dev
+          sudo apt-get install gcc-9=9.3.0-17ubuntu1~20.04 g++-9=9.3.0-17ubuntu1~20.04 libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
       - name: Configure
@@ -485,7 +485,7 @@ jobs:
 
       - name: Install native host dependencies
         run: |
-          sudo apt-get install gcc-9=9.3.0-17ubuntu1~20.04 g++-9=9.3.0-17ubuntu1~20.04 libxrandr-dev libxtst-dev libcups2-dev libasound2-dev libx11-dev libxext-dev libxrender-dev libxt-dev
+          sudo apt-get install gcc-9=9.3.0-17ubuntu1~20.04 g++-9=9.3.0-17ubuntu1~20.04 libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
         if: matrix.debian-arch == ''
 
