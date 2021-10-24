@@ -128,7 +128,7 @@ public class StringRepeat {
                 count++;
                 if (offset != expected) {
                     System.err.format("\"%s\".repeat(%d)%n", truncate(string), repeat);
-                    System.err.format("Result \"%s\"%n", truncate(result));
+                    System.err.format("Result \"%s\"%n", truncate(result.substring(expected, expected + 30)));
                     System.err.format("Repeat expected at %d, found at = %d%n", expected, offset);
                     throw new RuntimeException();
                 }
