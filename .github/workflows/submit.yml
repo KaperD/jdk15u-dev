@@ -1030,6 +1030,11 @@ jobs:
       BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_SHA256 }}"
 
     steps:
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - name: Checkout the source
         uses: actions/checkout@v2
 
