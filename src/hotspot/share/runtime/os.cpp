@@ -53,8 +53,8 @@
 #include "runtime/javaCalls.hpp"
 #include "runtime/mutexLocker.hpp"
 #include "runtime/os.inline.hpp"
+#include "runtime/safefetch.inline.hpp"
 #include "runtime/sharedRuntime.hpp"
-#include "runtime/stubRoutines.hpp"
 #include "runtime/thread.inline.hpp"
 #include "runtime/threadSMR.hpp"
 #include "runtime/vm_version.hpp"
@@ -1653,49 +1653,22 @@ bool os::create_stack_guard_pages(char* addr, size_t bytes) {
   return os::pd_create_stack_guard_pages(addr, bytes);
 }
 
-char* os::reserve_memory(size_t bytes, char* addr, size_t alignment_hint, int file_desc) {
-  char* result = NULL;
-
-  if (file_desc != -1) {
-    // Could have called pd_reserve_memory() followed by replace_existing_mapping_with_file_mapping(),
-    // but AIX may use SHM in which case its more trouble to detach the segment and remap memory to the file.
-    result = os::map_memory_to_file(addr, bytes, file_desc);
-    if (result != NULL) {
-      MemTracker::record_virtual_memory_reserve_and_commit((address)result, bytes, CALLER_PC);
-    }
-  } else {
-    result = pd_reserve_memory(bytes, addr, alignment_hint);
-    if (result != NULL) {
-      MemTracker::record_virtual_memory_reserve((address)result, bytes, CALLER_PC);
+char* os::reserve_memory(size_t bytes, bool executable, MEMFLAGS flags) {
+  char* result = pd_reserve_memory(bytes, executable);
+  if (result != NULL) {
+    MemTracker::record_virtual_memory_reserve(result, bytes, CALLER_PC);
+    if (flags != mtOther) {
+      MemTracker::record_virtual_memory_type(result, flags);
     }
   }
 
   return result;
 }
 
-char* os::reserve_memory(size_t bytes, char* addr, size_t alignment_hint,
-   MEMFLAGS flags) {
-  char* result = pd_reserve_memory(bytes, addr, alignment_hint);
+char* os::attempt_reserve_memory_at(char* addr, size_t bytes, bool executable) {
+  char* result = pd_attempt_reserve_memory_at(addr, bytes, executable);
   if (result != NULL) {
     MemTracker::record_virtual_memory_reserve((address)result, bytes, CALLER_PC);
-    MemTracker::record_virtual_memory_type((address)result, flags);
-  }
-
-  return result;
-}
-
-char* os::attempt_reserve_memory_at(size_t bytes, char* addr, int file_desc) {
-  char* result = NULL;
-  if (file_desc != -1) {
-    result = pd_attempt_reserve_memory_at(bytes, addr, file_desc);
-    if (result != NULL) {
-      MemTracker::record_virtual_memory_reserve_and_commit((address)result, bytes, CALLER_PC);
-    }
-  } else {
-    result = pd_attempt_reserve_memory_at(bytes, addr);
-    if (result != NULL) {
-      MemTracker::record_virtual_memory_reserve((address)result, bytes, CALLER_PC);
-    }
   }
   return result;
 }
@@ -1729,16 +1702,16 @@ void os::commit_memory_or_exit(char* addr, size_t size, size_t alignment_hint,
   MemTracker::record_virtual_memory_commit((address)addr, size, CALLER_PC);
 }
 
-bool os::uncommit_memory(char* addr, size_t bytes) {
+bool os::uncommit_memory(char* addr, size_t bytes, bool executable) {
   bool res;
   if (MemTracker::tracking_level() > NMT_minimal) {
     Tracker tkr(Tracker::uncommit);
-    res = pd_uncommit_memory(addr, bytes);
+    res = pd_uncommit_memory(addr, bytes, executable);
     if (res) {
       tkr.record((address)addr, bytes);
     }
   } else {
-    res = pd_uncommit_memory(addr, bytes);
+    res = pd_uncommit_memory(addr, bytes, executable);
   }
   return res;
 }
@@ -1762,6 +1735,25 @@ void os::pretouch_memory(void* start, void* end, size_t page_size) {
   for (volatile char *p = (char*)start; p < (char*)end; p += page_size) {
     *p = 0;
   }
+}
+
+char* os::map_memory_to_file(size_t bytes, int file_desc) {
+  // Could have called pd_reserve_memory() followed by replace_existing_mapping_with_file_mapping(),
+  // but AIX may use SHM in which case its more trouble to detach the segment and remap memory to the file.
+  // On all current implementations NULL is interpreted as any available address.
+  char* result = os::map_memory_to_file(NULL /* addr */, bytes, file_desc);
+  if (result != NULL) {
+    MemTracker::record_virtual_memory_reserve_and_commit(result, bytes, CALLER_PC);
+  }
+  return result;
+}
+
+char* os::attempt_map_memory_to_file_at(char* addr, size_t bytes, int file_desc) {
+  char* result = pd_attempt_map_memory_to_file_at(addr, bytes, file_desc);
+  if (result != NULL) {
+    MemTracker::record_virtual_memory_reserve_and_commit((address)result, bytes, CALLER_PC);
+  }
+  return result;
 }
 
 char* os::map_memory(int fd, const char* file_name, size_t file_offset,
