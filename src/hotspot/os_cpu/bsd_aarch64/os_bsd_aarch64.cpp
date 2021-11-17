@@ -259,6 +259,10 @@ JVM_handle_bsd_signal(int sig,
 
   Thread* t = Thread::current_or_null_safe();
 
+  // Enable WXWrite: this function is called by the signal handler at arbitrary
+  // point of execution.
+  ThreadWXEnable wx(WXWrite, t);
+
   // Must do this before SignalHandlerMark, if crash protection installed we will longjmp away
   // (no destructors can be run)
   os::ThreadCrashProtection::check_crash_protection(sig, t);
@@ -767,6 +771,10 @@ void os::verify_stack_alignment() {
 int os::extra_bang_size_in_bytes() {
   // AArch64 does not require the additional stack bang.
   return 0;
+}
+
+void os::current_thread_enable_wx(WXMode mode) {
+  pthread_jit_write_protect_np(mode == WXExec);
 }
 
 extern "C" {
