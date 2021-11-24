@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 1999, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2021, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2014, 2019, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2021, Azul Systems, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,8 +26,6 @@
 
 #ifndef OS_CPU_BSD_AARCH64_ATOMIC_BSD_AARCH64_HPP
 #define OS_CPU_BSD_AARCH64_ATOMIC_BSD_AARCH64_HPP
-
-#include "runtime/vm_version.hpp"
 
 // Implementation of class atomic
 // Note that memory_order_conservative requires a full barrier after atomic stores.
@@ -58,10 +57,9 @@ inline T Atomic::PlatformXchg<byte_size>::operator()(T volatile* dest,
   return res;
 }
 
-// __attribute__((unused)) on dest is to get rid of spurious GCC warnings.
 template<size_t byte_size>
 template<typename T>
-inline T Atomic::PlatformCmpxchg<byte_size>::operator()(T volatile* dest __attribute__((unused)),
+inline T Atomic::PlatformCmpxchg<byte_size>::operator()(T volatile* dest,
                                                         T compare_value,
                                                         T exchange_value,
                                                         atomic_memory_order order) const {
