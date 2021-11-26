@@ -518,7 +518,8 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBFONTMANAGER, \
         maybe-uninitialized class-memaccess, \
     DISABLED_WARNINGS_clang := unused-value incompatible-pointer-types \
         tautological-constant-out-of-range-compare int-to-pointer-cast \
-        sign-compare undef missing-field-initializers, \
+        sign-compare undef missing-field-initializers \
+        deprecated-declarations, \
     DISABLED_WARNINGS_microsoft := 4267 4244 4018 4090 4996 4146 4334 4819 4101 4068 4805 4138, \
     LDFLAGS := $(subst -Xlinker -z -Xlinker defs,, \
         $(subst -Wl$(COMMA)-z$(COMMA)defs,,$(LDFLAGS_JDKLIB))) $(LDFLAGS_CXX_JDK) \
@@ -740,7 +741,8 @@ ifeq ($(ENABLE_HEADLESS_ONLY), false)
       DISABLED_WARNINGS_gcc := sign-compare type-limits unused-result \
           maybe-uninitialized shift-negative-value implicit-fallthrough \
           unused-function, \
-      DISABLED_WARNINGS_clang := incompatible-pointer-types sign-compare, \
+      DISABLED_WARNINGS_clang := incompatible-pointer-types sign-compare \
+          deprecated-declarations, \
       DISABLED_WARNINGS_microsoft := 4018 4244 4267, \
       LDFLAGS := $(LDFLAGS_JDKLIB) \
           $(call SET_SHARED_LIBRARY_ORIGIN), \

@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2011, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, Azul Systems, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -21,9 +20,30 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
  */
 
-// Support for detecting Mac OS X versions
+#ifndef SHARE_RUNTIME_THREADWXSETTERS_INLINE_HPP
+#define SHARE_RUNTIME_THREADWXSETTERS_INLINE_HPP
 
-double getOSXMajorVersion();
-BOOL isSnowLeopardOrLower();
+#include "runtime/thread.inline.hpp"
+
+#if defined(__APPLE__) && defined(AARCH64)
+class ThreadWXEnable  {
+  Thread* _thread;
+  WXMode _old_mode;
+public:
+  ThreadWXEnable(WXMode new_mode, Thread* thread) :
+    _thread(thread),
+    _old_mode(_thread ? _thread->enable_wx(new_mode) : WXWrite)
+  { }
+  ~ThreadWXEnable() {
+    if (_thread) {
+      _thread->enable_wx(_old_mode);
+    }
+  }
+};
+#endif // __APPLE__ && AARCH64
+
+#endif // SHARE_RUNTIME_THREADWXSETTERS_INLINE_HPP
+
