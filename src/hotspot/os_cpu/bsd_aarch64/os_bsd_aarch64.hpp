@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2021, Azul Systems, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,18 +24,20 @@
  *
  */
 
-#ifndef SHARE_PRIMS_WHITEBOX_INLINE_HPP
-#define SHARE_PRIMS_WHITEBOX_INLINE_HPP
+#ifndef OS_CPU_BSD_AARCH64_OS_BSD_AARCH64_HPP
+#define OS_CPU_BSD_AARCH64_OS_BSD_AARCH64_HPP
 
-#include "prims/whitebox.hpp"
-#include "runtime/interfaceSupport.inline.hpp"
+  static void setup_fpu();
 
-// Entry macro to transition from JNI to VM state.
+  static bool is_allocatable(size_t bytes);
 
-#define WB_ENTRY(result_type, header) JNI_ENTRY(result_type, header) \
-  ClearPendingJniExcCheck _clearCheck(env); \
-  MACOS_AARCH64_ONLY(ThreadWXEnable _wx(WXWrite, thread));
+  // Used to register dynamic code cache area with the OS
+  // Note: Currently only used in 64 bit Windows implementations
+  static bool register_code_area(char *low, char *high) { return true; }
 
-#define WB_END JNI_END
+  // Atomically copy 64 bits of data
+  static void atomic_copy64(const volatile void *src, volatile void *dst) {
+    *(jlong *) dst = *(const jlong *) src;
+  }
 
-#endif // SHARE_PRIMS_WHITEBOX_INLINE_HPP
+#endif // OS_CPU_BSD_AARCH64_OS_BSD_AARCH64_HPP

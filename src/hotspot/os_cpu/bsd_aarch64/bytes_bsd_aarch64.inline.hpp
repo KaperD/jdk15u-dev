@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2021, Azul Systems, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,18 +24,33 @@
  *
  */
 
-#ifndef SHARE_PRIMS_WHITEBOX_INLINE_HPP
-#define SHARE_PRIMS_WHITEBOX_INLINE_HPP
+#ifndef OS_CPU_BSD_AARCH64_BYTES_BSD_AARCH64_INLINE_HPP
+#define OS_CPU_BSD_AARCH64_BYTES_BSD_AARCH64_INLINE_HPP
 
-#include "prims/whitebox.hpp"
-#include "runtime/interfaceSupport.inline.hpp"
+#ifdef __APPLE__
+#include <libkern/OSByteOrder.h>
+#endif
 
-// Entry macro to transition from JNI to VM state.
+#if defined(__APPLE__)
+#  define bswap_16(x) OSSwapInt16(x)
+#  define bswap_32(x) OSSwapInt32(x)
+#  define bswap_64(x) OSSwapInt64(x)
+#else
+#  error "Unimplemented"
+#endif
 
-#define WB_ENTRY(result_type, header) JNI_ENTRY(result_type, header) \
-  ClearPendingJniExcCheck _clearCheck(env); \
-  MACOS_AARCH64_ONLY(ThreadWXEnable _wx(WXWrite, thread));
+// Efficient swapping of data bytes from Java byte
+// ordering to native byte ordering and vice versa.
+inline u2   Bytes::swap_u2(u2 x) {
+  return bswap_16(x);
+}
 
-#define WB_END JNI_END
+inline u4   Bytes::swap_u4(u4 x) {
+  return bswap_32(x);
+}
 
-#endif // SHARE_PRIMS_WHITEBOX_INLINE_HPP
+inline u8 Bytes::swap_u8(u8 x) {
+  return bswap_64(x);
+}
+
+#endif // OS_CPU_BSD_AARCH64_BYTES_BSD_AARCH64_INLINE_HPP
