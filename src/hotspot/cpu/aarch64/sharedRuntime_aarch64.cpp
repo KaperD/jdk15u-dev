@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2003, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2014, 2020, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2021, Azul Systems, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -402,7 +403,7 @@ static void gen_c2i_adapter(MacroAssembler *masm,
     // 3    8 T_BOOL
     // -    0 return address
     //
-    // However to make thing extra confusing. Because we can fit a long/double in
+    // However to make thing extra confusing. Because we can fit a Java long/double in
     // a single slot on a 64 bt vm and it would be silly to break them up, the interpreter
     // leaves one slot empty and only stores to a single slot. In this case the
     // slot that is occupied is the T_VOID slot. See I said it was confusing.
@@ -435,7 +436,7 @@ static void gen_c2i_adapter(MacroAssembler *masm,
           __ str(rscratch1, Address(sp, next_off));
 #ifdef ASSERT
           // Overwrite the unused slot with known junk
-          __ mov(rscratch1, 0xdeadffffdeadaaaaul);
+          __ mov(rscratch1, (uint64_t)0xdeadffffdeadaaaaull);
           __ str(rscratch1, Address(sp, st_off));
 #endif /* ASSERT */
         } else {
@@ -452,10 +453,10 @@ static void gen_c2i_adapter(MacroAssembler *masm,
         // Two VMREgs|OptoRegs can be T_OBJECT, T_ADDRESS, T_DOUBLE, T_LONG
         // T_DOUBLE and T_LONG use two slots in the interpreter
         if ( sig_bt[i] == T_LONG || sig_bt[i] == T_DOUBLE) {
-          // long/double in gpr
+          // jlong/double in gpr
 #ifdef ASSERT
           // Overwrite the unused slot with known junk
-          __ mov(rscratch1, 0xdeadffffdeadaaabul);
+          __ mov(rscratch1, (uint64_t)0xdeadffffdeadaaabull);
           __ str(rscratch1, Address(sp, st_off));
 #endif /* ASSERT */
           __ str(r, Address(sp, next_off));
@@ -471,7 +472,7 @@ static void gen_c2i_adapter(MacroAssembler *masm,
       } else {
 #ifdef ASSERT
         // Overwrite the unused slot with known junk
-        __ mov(rscratch1, 0xdeadffffdeadaaacul);
+        __ mov(rscratch1, (uint64_t)0xdeadffffdeadaaacull);
         __ str(rscratch1, Address(sp, st_off));
 #endif /* ASSERT */
         __ strd(r_1->as_FloatRegister(), Address(sp, next_off));
@@ -742,7 +743,7 @@ AdapterHandlerEntry* SharedRuntime::generate_i2c2i_adapters(MacroAssembler *masm
   return AdapterHandlerLibrary::new_entry(fingerprint, i2c_entry, c2i_entry, c2i_unverified_entry, c2i_no_clinit_check_entry);
 }
 
-int SharedRuntime::c_calling_convention(const BasicType *sig_bt,
+static int c_calling_convention_priv(const BasicType *sig_bt,
                                          VMRegPair *regs,
                                          VMRegPair *regs2,
                                          int total_args_passed) {
@@ -773,6 +774,11 @@ int SharedRuntime::c_calling_convention(const BasicType *sig_bt,
         if (int_args < Argument::n_int_register_parameters_c) {
           regs[i].set1(INT_ArgReg[int_args++]->as_VMReg());
         } else {
+#ifdef __APPLE__
+          // Less-than word types are stored one after another.
+          // The code is unable to handle this so bailout.
+          return -1;
+#endif
           regs[i].set1(VMRegImpl::stack2reg(stk_args));
           stk_args += 2;
         }
@@ -795,6 +801,11 @@ int SharedRuntime::c_calling_convention(const BasicType *sig_bt,
         if (fp_args < Argument::n_float_register_parameters_c) {
           regs[i].set1(FP_ArgReg[fp_args++]->as_VMReg());
         } else {
+#ifdef __APPLE__
+          // Less-than word types are stored one after another.
+          // The code is unable to handle this so bailout.
+          return -1;
+#endif
           regs[i].set1(VMRegImpl::stack2reg(stk_args));
           stk_args += 2;
         }
@@ -819,6 +830,16 @@ int SharedRuntime::c_calling_convention(const BasicType *sig_bt,
     }
 
   return stk_args;
+}
+
+int SharedRuntime::c_calling_convention(const BasicType *sig_bt,
+                                         VMRegPair *regs,
+                                         VMRegPair *regs2,
+                                         int total_args_passed)
+{
+  int result = c_calling_convention_priv(sig_bt, regs, regs2, total_args_passed);
+  guarantee(result >= 0, "Unsupported arguments configuration");
+  return result;
 }
 
 // On 64 bit we will store integer like items to the stack as
@@ -1354,7 +1375,11 @@ nmethod* SharedRuntime::generate_native_wrapper(MacroAssembler* masm,
   // Now figure out where the args must be stored and how much stack space
   // they require.
   int out_arg_slots;
-  out_arg_slots = c_calling_convention(out_sig_bt, out_regs, NULL, total_c_args);
+  out_arg_slots = c_calling_convention_priv(out_sig_bt, out_regs, NULL, total_c_args);
+
+  if (out_arg_slots < 0) {
+    return NULL;
+  }
 
   // Compute framesize for the wrapper.  We need to handlize all oops in
   // incoming registers
@@ -1700,7 +1725,7 @@ nmethod* SharedRuntime::generate_native_wrapper(MacroAssembler* masm,
 
   Label dtrace_method_entry, dtrace_method_entry_done;
   {
-    unsigned long offset;
+    uint64_t offset;
     __ adrp(rscratch1, ExternalAddress((address)&DTraceMethodProbes), offset);
     __ ldrb(rscratch1, Address(rscratch1, offset));
     __ cbnzw(rscratch1, dtrace_method_entry);
@@ -1914,7 +1939,7 @@ nmethod* SharedRuntime::generate_native_wrapper(MacroAssembler* masm,
 
   Label dtrace_method_exit, dtrace_method_exit_done;
   {
-    unsigned long offset;
+    uint64_t offset;
     __ adrp(rscratch1, ExternalAddress((address)&DTraceMethodProbes), offset);
     __ ldrb(rscratch1, Address(rscratch1, offset));
     __ cbnzw(rscratch1, dtrace_method_exit);
