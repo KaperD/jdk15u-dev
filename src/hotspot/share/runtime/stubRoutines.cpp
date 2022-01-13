@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2021, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -30,8 +30,8 @@
 #include "oops/oop.inline.hpp"
 #include "runtime/interfaceSupport.inline.hpp"
 #include "runtime/timerTrace.hpp"
+#include "runtime/safefetch.inline.hpp"
 #include "runtime/sharedRuntime.hpp"
-#include "runtime/stubRoutines.hpp"
 #include "utilities/align.hpp"
 #include "utilities/copy.hpp"
 #include "utilities/vmError.hpp"
@@ -317,6 +317,8 @@ void StubRoutines::initialize2() {
 
 #ifdef ASSERT
 
+  MACOS_AARCH64_ONLY(os::current_thread_enable_wx(WXExec));
+
 #define TEST_ARRAYCOPY(type)                                                    \
   test_arraycopy_func(          type##_arraycopy(),          sizeof(type));     \
   test_arraycopy_func(          type##_disjoint_arraycopy(), sizeof(type));     \
@@ -396,6 +398,8 @@ void StubRoutines::initialize2() {
   test_safefetch32();
   test_safefetchN();
 #endif
+
+  MACOS_AARCH64_ONLY(os::current_thread_enable_wx(WXWrite));
 
 #endif
 }
