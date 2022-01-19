@@ -24,6 +24,7 @@
  */
 
 #include "precompiled.hpp"
+#include "arguments.hpp"
 #include "runtime/java.hpp"
 #include "runtime/os.hpp"
 #include "runtime/vm_version.hpp"
