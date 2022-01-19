@@ -1,8 +1,8 @@
 import random
 
-AARCH64_AS = "<PATH-TO-AS>"
-AARCH64_OBJDUMP = "<PATH-TO-OBJDUMP>"
-AARCH64_OBJCOPY = "<PATH-TO-OBJCOPY>"
+AARCH64_AS = "as"
+AARCH64_OBJDUMP = "objdump"
+AARCH64_OBJCOPY = "objcopy"
 
 class Operand(object):
 
@@ -13,6 +13,8 @@ class Register(Operand):
 
     def generate(self):
         self.number = random.randint(0, 30)
+        if self.number == 18:
+            self.number = 17
         return self
 
     def astr(self, prefix):
@@ -37,6 +39,8 @@ class GeneralRegisterOrZr(Register):
 
     def generate(self):
         self.number = random.randint(0, 31)
+        if self.number == 18:
+            self.number = 16
         return self
 
     def astr(self, prefix = ""):
@@ -54,6 +58,8 @@ class GeneralRegisterOrZr(Register):
 class GeneralRegisterOrSp(Register):
     def generate(self):
         self.number = random.randint(0, 31)
+        if self.number == 18:
+            self.number = 15
         return self
 
     def astr(self, prefix = ""):
@@ -348,7 +354,7 @@ class LogicalImmOp(AddSubImmOp):
                   + ', #0x%x' % self.immed)
 
      def cstr(self):
-          return super(AddSubImmOp, self).cstr() + "l);"
+          return super(AddSubImmOp, self).cstr() + "ll);"
     
 class MultiOp():
 
